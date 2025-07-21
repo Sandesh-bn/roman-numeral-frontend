@@ -1,12 +1,16 @@
 import { Button, defaultTheme, Provider } from '@adobe/react-spectrum';
-import { TextField, Heading, Text } from '@adobe/react-spectrum';
+import { TextField, Heading, Text, Grid } from '@adobe/react-spectrum';
 import { useState } from 'react';
+import Moon from '@spectrum-icons/workflow/Moon';
+import Light from '@spectrum-icons/workflow/Light';
+
 
 export function RomanNumeralConvertor() {
     const [romanNumeral, setRomanNumeral] = useState('');
     const [userInput, setUserInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setError] = useState('');
+    const [colorScheme, setColorScheme] = useState('light');
 
     function handleSubmit() {
         fetch("http://localhost:8080/romannumeral?query=" + userInput)
@@ -14,11 +18,8 @@ export function RomanNumeralConvertor() {
             .then(
                 (result) => {
                     setIsLoading(false);
-                    setRomanNumeral(romanNumeral);
+                    setRomanNumeral(result.output);
                 },
-                // Note: it's important to handle errors here
-                // instead of a catch() block so that we don't swallow
-                // exceptions from actual bugs in components.
                 (error) => {
                     setIsLoading(false);
                     setError(error);
@@ -26,24 +27,73 @@ export function RomanNumeralConvertor() {
             )
     }
 
+    function handleKeyDown(e) {
+        if (e.key == 'Enter')
+            handleSubmit();
+    }
+
+    function handleChange(inputValue) {
+        setUserInput(inputValue);
+        const numericValue = parseInt(inputValue, 10);
+
+        if (inputValue === '') {
+            setError(null); 
+        } else if (isNaN(numericValue)) {
+            setError('Please enter a valid number.');
+        }
+        else if (numericValue <= 0) {
+            setError('Roman numerals do not support negative numbers or zero.');
+        }
+        else if (numericValue > 3999) {
+            setError('Value must not exceed 3999.');
+        } else {
+            setError(null);
+        }
+    }
+
+    function toggleColorScheme() {
+        setColorScheme(colorScheme == 'light' ? 'dark' : 'light')
+    }
+
+    const validationState = userInput === ''
+        ? undefined
+        : errorMessage
+            ? 'invalid'
+            : 'valid';
+
     return (
-        <Provider colorScheme="light" theme={defaultTheme}>
-            <Heading level={1}>Roman numeral convertor</Heading>
-            <TextField
-                type="number"
-                label="Enter a number"
-                value={userInput}
-                onChange={(e) => setUserInput(e)}
-            />
-            <br />
-            <Button
-                variant="primary"
-                onPress={() => alert('Hey there!')}
-            >
-                Convert to roman numeral
-            </Button>
-            <Heading level={4}>Roman numeral: </Heading><Text>{romanNumeral}</Text>
-            {userInput}
+        <Provider height={'100vh'} colorScheme={colorScheme} theme={defaultTheme}>
+
+            {colorScheme == 'light' ?
+                <div onClick={() => toggleColorScheme()}>
+                    <Moon aria-label="Toggle Color Scheme" />
+                </div> :
+                <div onClick={() => toggleColorScheme()}>
+                    <Light aria-label="Toggle Color Scheme" />
+                </div>
+            }
+
+            <Grid justifyContent={'center'} height="50%">
+                <Heading level={1}>Roman numeral convertor</Heading>
+                <TextField
+                    type="number"
+                    label="Enter a number"
+                    value={userInput}
+                    onKeyDown={handleKeyDown}
+                    onChange={handleChange}
+                    validationState={validationState}
+                    errorMessage={errorMessage}
+                    isRequired
+                />
+                <br />
+                <Button
+                    variant="primary"
+                    onPress={() => handleSubmit()}
+                >
+                    Convert to roman numeral
+                </Button>
+                <Heading level={4}>Roman numeral: </Heading><Text>{romanNumeral}</Text>
+            </Grid>
         </Provider>
     );
 }
