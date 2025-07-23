@@ -3,12 +3,12 @@ import { TextField, Heading, Text, Grid, View } from '@adobe/react-spectrum';
 import { useState } from 'react';
 import Moon from '@spectrum-icons/workflow/Moon';
 import Light from '@spectrum-icons/workflow/Light';
+import './RomanNumeralConvertor.css';
 
 export function RomanNumeralConvertor() {
     const isLight = window.matchMedia("(prefers-color-scheme:light)").matches
     const [romanNumeral, setRomanNumeral] = useState('');
     const [userInput, setUserInput] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setError] = useState('');
     const [colorScheme, setColorScheme] = useState(isLight? 'light': 'dark');
 
@@ -21,11 +21,9 @@ export function RomanNumeralConvertor() {
                 .then(res => res.json())
                 .then(
                     (result) => {
-                        setIsLoading(false);
                         setRomanNumeral(result.output);
                     },
                     (error) => {
-                        setIsLoading(false);
                         setError(error);
                     }
                 )
@@ -87,11 +85,16 @@ export function RomanNumeralConvertor() {
                     </div>
                 }
 
-                <Grid justifyContent={'center'} height="50%">
+                <Grid justifyContent={'center'} height="40%">
                     <Heading level={1}>Roman numeral convertor</Heading>
+                    <div 
+                        className='input-container'
+                    >
                     <TextField
                         type="number"
-                        label="Enter a number"
+                        position={"absolute"}
+                        width="100%"
+                        label="Enter a number:"
                         value={userInput}
                         onKeyDown={handleKeyDown}
                         onChange={handleChange}
@@ -99,14 +102,14 @@ export function RomanNumeralConvertor() {
                         errorMessage={errorMessage}
                         isRequired
                     />
-                    <br />
+                    </div>
                     <Button
                         variant="primary"
                         onPress={() => handleSubmit()}
                     >
                         Convert to roman numeral
                     </Button>
-                    <Heading level={4}>Roman numeral: </Heading><Text>{romanNumeral}</Text>
+                    <Text><b>Roman numeral: </b>{romanNumeral}</Text>
                 </Grid>
             </View>
         </Provider>
