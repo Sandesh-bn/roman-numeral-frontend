@@ -5,11 +5,12 @@ import Moon from '@spectrum-icons/workflow/Moon';
 import Light from '@spectrum-icons/workflow/Light';
 
 export function RomanNumeralConvertor() {
+    const isLight = window.matchMedia("(prefers-color-scheme:light)").matches
     const [romanNumeral, setRomanNumeral] = useState('');
     const [userInput, setUserInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setError] = useState('');
-    const [colorScheme, setColorScheme] = useState('light');
+    const [colorScheme, setColorScheme] = useState(isLight? 'light': 'dark');
 
     function handleSubmit() {
         let integer = parseInt(userInput);
@@ -47,8 +48,12 @@ export function RomanNumeralConvertor() {
 
         if (inputValue === '') {
             setError(null);
-        } else if (isNaN(numericValue)) {
+        } 
+        else if (isNaN(numericValue)) {
             setError('Please enter a valid number.');
+        }
+        else if (inputValue.includes('.')){
+           setError("Number cannot be a decimal.")
         }
         else if (numericValue <= 0) {
             setError('Roman numerals do not support negative numbers or zero.');
