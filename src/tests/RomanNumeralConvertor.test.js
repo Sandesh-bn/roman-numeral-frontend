@@ -87,8 +87,8 @@ describe('RomanNumeralConvertor Component', () => {
     fireEvent.click(button);
 
     await waitFor(() => {
-      // expect(global.fetch).toHaveBeenCalledWith('https://roman-number-backend.vercel.app/romannumeral?query=10');
-      expect(global.fetch).toHaveBeenCalledWith('http://localhost:8080/romannumeral?query=10');
+      expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('/romannumeral?query=10'));
+
       expect(screen.getByTestId('roman-result')).toHaveTextContent('Roman numeral: X');
     });
   });

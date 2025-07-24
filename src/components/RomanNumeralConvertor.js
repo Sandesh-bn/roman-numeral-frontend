@@ -12,11 +12,12 @@ export function RomanNumeralConvertor() {
     const [userInput, setUserInput] = useState('');
     const [errorMessage, setError] = useState('');
     const [colorScheme, setColorScheme] = useState(isLight ? 'light' : 'dark');
+    const url = (process.env.NODE_ENV === 'development') ? 'http://localhost:8080' : 'https://roman-number-backend.vercel.app';
 
     function handleSubmit() {
         let integer = parseInt(userInput)
         if (integer > 0 && integer < 4000) {
-            fetch("http://localhost:8080/romannumeral?query=" + userInput)
+            fetch(url + "/romannumeral?query=" + userInput)
                 .then(async (res) => {
                     if (!res.ok) {
                         throw new Error(`Server responded with status ${res.status}`);
