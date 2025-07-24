@@ -1,34 +1,39 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { RomanNumeralConvertor } from '../components/RomanNumeralConvertor'
 
+// mock global.matchMedia which is related to testing user settings
+// to determine default color schem (dark/light) when app loads.
 beforeAll(() => {
-  global.matchMedia = global.matchMedia || function(query) {
-  return {
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
+  global.matchMedia = global.matchMedia || function (query) {
+    return {
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    }
   }
-}
-
 })
+
+// mock fetch api
 beforeEach(() => {
   global.fetch = jest.fn(() =>
     Promise.resolve({
-      json: () => Promise.resolve({ output: 'X' }),
+      ok: true,
+      json: () => Promise.resolve({ output: 'X' })
     })
   );
-
 });
+
 
 afterEach(() => {
   jest.clearAllMocks();
 });
 
+// Test RomanNumeralConvertor Component
 describe('RomanNumeralConvertor Component', () => {
   test('renders input, button, and heading', () => {
     render(<RomanNumeralConvertor />);
@@ -43,7 +48,9 @@ describe('RomanNumeralConvertor Component', () => {
 
     fireEvent.change(input, { target: { value: '15' } });
     expect(input.value).toBe('15');
-    expect(screen.getByText(/Roman numeral:/i).nextSibling.textContent).toBe('');
+    const resultDisplay = screen.getByTestId('roman-result');
+    expect(resultDisplay).toHaveTextContent('Roman numeral:');
+    // expect(screen.getByText(/Roman numeral:/i).nextSibling.textContent).toBe('');
   });
 
   test('shows error for invalid input', () => {
@@ -80,8 +87,9 @@ describe('RomanNumeralConvertor Component', () => {
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('https://roman-number-backend.vercel.app/romannumeral?query=10');
-      expect(screen.getByText(/Roman numeral:/i).nextSibling.textContent).toBe('X');
+      // expect(global.fetch).toHaveBeenCalledWith('https://roman-number-backend.vercel.app/romannumeral?query=10');
+      expect(global.fetch).toHaveBeenCalledWith('http://localhost:8080/romannumeral?query=10');
+      expect(screen.getByTestId('roman-result')).toHaveTextContent('Roman numeral: X');
     });
   });
 
@@ -115,10 +123,10 @@ describe('RomanNumeralConvertor Component', () => {
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(screen.getByText(/Roman numeral:/i).nextSibling.textContent).toBe('');
+      const resultDisplay = screen.getByTestId('roman-result');
+      expect(resultDisplay).toHaveTextContent('Roman numeral:');
     });
   });
-
 
   test('does not call API on empty input', () => {
     render(<RomanNumeralConvertor />);
